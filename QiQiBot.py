@@ -28,6 +28,21 @@ async def signup(ctx):
     except:
         await ctx.channel.send("QiQi couldn't add you to her daily reminders list")
 
+@client.command()
+async def qiqihelp(ctx):
+    myEmbed = discord.Embed(
+        title = "QiQi's Daily Reminder List",
+        description = "A reminder bot to make sure QiQi remembers to do her daily logins. \
+        Her list takes the following commands: ",
+        colour = discord.Colour.from_rgb(40, 233, 239)
+    )
+
+    myEmbed.add_field(name ="-signup", value ="Qiqi will add you to her daily mailing list", inline =True)
+    myEmbed.add_field(name ="-qiqihelp", value ="Qiqi will show all the commands for this bot", inline =True)
+
+    await ctx.channel.send(embed=myEmbed)
+
+
 @tasks.loop(minutes=60.0)
 async def msgall():
     print("checking the time")
