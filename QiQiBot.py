@@ -94,7 +94,7 @@ async def getusers(ctx, arg=None):
     else:
         await target.send("no ids in user")
 
-@tasks.loop(seconds=10.0)
+@tasks.loop(minutes=60.0)
 async def msgall():
     print("checking the time")
 
