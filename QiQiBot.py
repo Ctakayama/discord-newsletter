@@ -115,7 +115,7 @@ async def msgall():
     embedMsg.set_footer(text = const.DAILY_MSG_FOOT)
 
     #server is 5 hours ahead pst
-    if datetime.now().hour == 17:
+    if datetime.now().hour == 23:
         print("correct time")
         for u in users:
                 print("attempting to msg " + u)
