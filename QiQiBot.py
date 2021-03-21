@@ -15,12 +15,19 @@ client  = commands.Bot(command_prefix =  '-')
 users = []
 events = []
 
+def remove_db(myCol, myDoc):
+    db.collection(myCol).document(myDoc).delete()
+
+def add_db(myCol, myDoc):
+    db.collection(myCol).document(myDoc).set()
+
+
 @client.event
 async def on_ready():
     print("Loading QiQi's daily reminder list")
     
     # adding users from firebase to users
-    userCol = db.collection('users').stream()
+    userCol = db.collection(const.USER_COLLECTION).stream()
     for u in userCol:
         users.append(u.id)
 
@@ -50,6 +57,7 @@ async def signup(ctx, *ids):
                 if i not in users:
                     print("adding: " + i + " username: "+ un.name)
                     users.append(i)
+                    add_db(const.USER_COLLECTION, i)
                 else:
                     print("skip add: " + i + " username: "+ un.name)
             except:
@@ -62,6 +70,7 @@ async def signup(ctx, *ids):
                 await target.send(const.ADD_MSG)
                 await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.ADD_MSG_SUCC)
                 users.append(myid)
+                add_db(const.USER_COLLECTION, myid)
             else:
                 await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.ADD_MSG_ALREADY_ADDED)
         except:
@@ -76,6 +85,7 @@ async def unsub(ctx, *ids):
                 if i in users:
                     print("removing: " + i + " username: "+ un.name)
                     users.remove(i)
+                    remove_db(const.USER_COLLECTION, i)
                 else:
                     print("skip removal: " + i + " username: "+ un.name)
             except:
@@ -85,6 +95,7 @@ async def unsub(ctx, *ids):
             myid = format(ctx.message.author.id)
             target = await client.fetch_user(myid)
             users.remove(myid)
+            remove_db(const.USER_COLLECTION, myid)
             await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.UNSUB_MSG)
         except:
             await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.UNSUB_MSG_ERR) 

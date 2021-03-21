@@ -28,4 +28,6 @@ WEEKLY_MSG_BOSS_D = "Costs 60*3 = 180 resin to unlock all rewards"
 UNSUB_MSG = ", QiQi removed you from her mailing list." 
 UNSUB_MSG_ERR = ", QiQi couldn't find you in her mailing list."
 
+USER_COLLECTION = "users"
+
 TOKEN = 'ODIxOTI4NDY3ODMzNjgzOTc4.YFK2iQ.5QYYxSdDiemsA3VRNasnP1frN1Y'
