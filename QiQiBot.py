@@ -3,10 +3,11 @@ import const
 from discord.ext import commands, tasks
 from datetime import datetime
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, firestore
 
 cred = credentials.Certificate("./firebaseKey.json")
 firebase_admin.initialize_app(cred)
+db = firestore.client()
 print("firebase loaded up")
 
 client  = commands.Bot(command_prefix =  '-')
@@ -17,7 +18,12 @@ events = []
 @client.event
 async def on_ready():
     print("Loading QiQi's daily reminder list")
+    userCol = db.collection('users').stream()
+
+    for u in userCol:
+        print(u.id)
     msgall.start()
+    
 
 @client.command()
 async def qiqihelp(ctx):
