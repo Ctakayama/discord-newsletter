@@ -15,11 +15,21 @@ client  = commands.Bot(command_prefix =  '-')
 users = []
 events = []
 
+#remove user from db
 def remove_db(myCol, myDoc):
-    db.collection(myCol).document(myDoc).delete()
+    try:
+        db.collection(myCol).document(myDoc).delete()
+    except:
+        print("couldn't remove "+myDoc+ " from " +myCol)
 
-def add_db(myCol, myDoc):
-    db.collection(myCol).document(myDoc).set({})
+#add user to db
+async def add_db(myCol, myDoc):
+    try:
+        un = await client.fetch_user(myDoc)
+        db.collection(myCol).document(myDoc).set({'username':un.name})
+    except:
+        print("couldn't add "+myDoc +" to " +myCol)
+
 
 
 @client.event
@@ -57,7 +67,7 @@ async def signup(ctx, *ids):
                 if i not in users:
                     print("adding: " + i + " username: "+ un.name)
                     users.append(i)
-                    add_db(const.USER_COLLECTION, i)
+                    await add_db(const.USER_COLLECTION, i)
                 else:
                     print("skip add: " + i + " username: "+ un.name)
             except:
@@ -70,7 +80,7 @@ async def signup(ctx, *ids):
                 await target.send(const.ADD_MSG)
                 await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.ADD_MSG_SUCC)
                 users.append(myid)
-                add_db(const.USER_COLLECTION, myid)
+                await add_db(const.USER_COLLECTION, myid)
             else:
                 await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.ADD_MSG_ALREADY_ADDED)
         except:
