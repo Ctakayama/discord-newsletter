@@ -22,7 +22,7 @@ async def on_ready():
     # adding users from firebase to users
     userCol = db.collection('users').stream()
     for u in userCol:
-        users.add(u.id)
+        users.append(u.id)
 
     msgall.start()
     
