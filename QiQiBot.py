@@ -18,10 +18,12 @@ events = []
 @client.event
 async def on_ready():
     print("Loading QiQi's daily reminder list")
+    
+    # adding users from firebase to users
     userCol = db.collection('users').stream()
-
     for u in userCol:
-        print(u.id)
+        users.add(u.id)
+
     msgall.start()
     
 
