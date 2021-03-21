@@ -19,7 +19,7 @@ def remove_db(myCol, myDoc):
     db.collection(myCol).document(myDoc).delete()
 
 def add_db(myCol, myDoc):
-    db.collection(myCol).document(myDoc).set()
+    db.collection(myCol).document(myDoc).set({})
 
 
 @client.event
