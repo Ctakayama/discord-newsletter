@@ -2,6 +2,12 @@ import discord
 import const
 from discord.ext import commands, tasks
 from datetime import datetime
+import firebase_admin
+from firebase_admin import credentials
+
+cred = credentials.Certificate("./firebaseKey.json")
+firebase_admin.initialize_app(cred)
+print("firebase loaded up")
 
 client  = commands.Bot(command_prefix =  '-')
 
@@ -115,7 +121,7 @@ async def msgall():
     embedMsg.set_footer(text = const.DAILY_MSG_FOOT)
 
     #server is 5 hours ahead pst
-    if datetime.now().hour == 23:
+    if datetime.now().hour == 17:
         print("correct time")
         for u in users:
                 print("attempting to msg " + u)
