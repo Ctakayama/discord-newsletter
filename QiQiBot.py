@@ -16,7 +16,7 @@ users = []
 events = []
 
 #remove user from db
-def remove_db(myCol, myDoc):
+async def remove_db(myCol, myDoc):
     try:
         db.collection(myCol).document(myDoc).delete()
     except:
@@ -95,7 +95,7 @@ async def unsub(ctx, *ids):
                 if i in users:
                     print("removing: " + i + " username: "+ un.name)
                     users.remove(i)
-                    remove_db(const.USER_COLLECTION, i)
+                    await remove_db(const.USER_COLLECTION, i)
                 else:
                     print("skip removal: " + i + " username: "+ un.name)
             except:
@@ -105,7 +105,7 @@ async def unsub(ctx, *ids):
             myid = format(ctx.message.author.id)
             target = await client.fetch_user(myid)
             users.remove(myid)
-            remove_db(const.USER_COLLECTION, myid)
+            await remove_db(const.USER_COLLECTION, myid)
             await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.UNSUB_MSG)
         except:
             await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.UNSUB_MSG_ERR) 
