@@ -1,8 +1,3 @@
-DAILY_URL = 'https://webstatic-sea.mihoyo.com/ys/event/signin-sea/index.html?act_id=e202102251931481&lang=en-us'
-SNAPSHOT_URL = 'https://www.hoyolab.com/genshin/article/260722'
-
-CURR_EVENTS = [('Daily Login', DAILY_URL), ('Windblume Snapshots', SNAPSHOT_URL)]
-
 HELP_TITLE = "QiQi's Daily Reminder List"
 HELP_DESC = "A reminder bot to make sure QiQi remembers to do her daily logins. \
             Her list takes the following commands: "
@@ -29,5 +24,10 @@ UNSUB_MSG = ", QiQi removed you from her mailing list."
 UNSUB_MSG_ERR = ", QiQi couldn't find you in her mailing list."
 
 USER_COLLECTION = "users"
+EVENT_COLLECTION = "events"
+
+PARA_DAY_SET_MSG = ", QiQi will remind you about the *Parametric Transformer* next "
+DAYS = {'monday':0, 'tuesday':1, 'wednesday':2, 'thursday':3, 'friday':4, 'saturday':5, 'sunday':6, 'clear':-1}
+NO_DAY_ERR = ", QiQi needs a valid day. Valid days include: "
 
 TOKEN = 'ODIxOTI4NDY3ODMzNjgzOTc4.YFK2iQ.5QYYxSdDiemsA3VRNasnP1frN1Y'

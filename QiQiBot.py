@@ -30,6 +30,13 @@ async def add_db(myCol, myDoc):
     except:
         print("couldn't add "+myDoc +" to " +myCol)
 
+#update existing user on db
+async def update_db(myCol, myDoc, key, val):
+    try:
+        db.collection(myCol).document(myDoc).set({key:val}, merge=True)
+    except:
+        print("failed to update "+myDoc +" in " +myCol)
+
 
 
 @client.event
@@ -129,6 +136,21 @@ async def getusers(ctx, arg=None):
     else:
         await target.send("no ids in user")
 
+@client.command()
+async def parametric(ctx, day):
+    if day.lower() in const.DAYS:
+        myid = format(ctx.message.author.id)
+        await update_db(const.USER_COLLECTION, myid, 'parametricDay', const.DAYS[day.lower()])
+        await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.PARA_DAY_SET_MSG+"**"+day.lower()+"**"+".") 
+    else:
+        validDays = ''
+        for key,_ in const.DAYS.items():
+            validDays += "**" + key+ "**" + ", " 
+        validDays = validDays[:-2]
+        await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.NO_DAY_ERR+validDays)
+
+#TODO: check for parametricDay and send message accordingly
+#check every 60 minutes 
 @tasks.loop(minutes=60.0)
 async def msgall():
     print("checking the time")
@@ -138,10 +160,12 @@ async def msgall():
         description = const.DAILY_MSG_DESC,
         colour = discord.Colour.from_rgb(40, 233, 239)
     )
-
+    
     #Ongoing events case
-    for t,u in const.CURR_EVENTS:
-        embedMsg.add_field(name =t, value =u, inline =True)
+    eventCol = db.collection(const.EVENT_COLLECTION).stream()
+    for e in eventCol:
+        eDict = e.to_dict()
+        embedMsg.add_field(name = eDict['title'], value = eDict['body'], inline =True)
 
     #weekly boss case
     if (datetime.now().weekday()) == 6:
@@ -159,5 +183,27 @@ async def msgall():
                     await target.send(embed = embedMsg)
                 except:
                     print("QiQi couldn't send to this user: " + u)
+
+# @client.command() 
+# async def testmsg(ctx):
+
+#     embedMsg = discord.Embed(
+#     title = const.DAILY_MSG_TITLE,
+#     description = const.DAILY_MSG_DESC,
+#     colour = discord.Colour.from_rgb(40, 233, 239)
+#     )
+    
+#     #Ongoing events case
+#     eventCol = db.collection(const.EVENT_COLLECTION).stream()
+#     for e in eventCol:
+#         eDict = e.to_dict()
+#         embedMsg.add_field(name = eDict['title'], value = eDict['body'], inline =True)
+
+#     #weekly boss case
+#     if (datetime.now().weekday()) == 6:
+#         embedMsg.add_field(name =const.WEEKLY_MSG_BOSS_T, value =const.WEEKLY_MSG_BOSS_D, inline =True)
+
+#     embedMsg.set_footer(text = const.DAILY_MSG_FOOT)
+#     await ctx.channel.send(embed = embedMsg)
 
 client.run(const.TOKEN)
