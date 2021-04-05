@@ -187,7 +187,7 @@ async def parametric(ctx, day):
 #check every 60 minutes 
 @tasks.loop(minutes=60.0)
 async def msgall():
-    print("checking the time")
+    print("checking the time: " + str(datetime.now().hour) + "; today is: " + str(datetime.now().weekday()))
 
     embedMsg = await embedBuilder(False)
     embedMsgP = await embedBuilder(True)
