@@ -12,8 +12,6 @@ print("firebase loaded up")
 
 client  = commands.Bot(command_prefix =  '-')
 
-users = []
-events = []
 
 #remove user from db
 async def remove_db(myCol, myDoc):
@@ -38,18 +36,37 @@ async def update_db(myCol, myDoc, key, val):
         print("failed to update "+myDoc +" in " +myCol)
 
 
+async def embedBuilder(isParaDay):
+    embedMsg = discord.Embed(
+        title = const.DAILY_MSG_TITLE,
+        description = const.DAILY_MSG_DESC,
+        colour = discord.Colour.from_rgb(40, 233, 239)
+    )
+    
+    #Ongoing events case
+    eventCol = db.collection(const.EVENT_COLLECTION).stream()
+    for e in eventCol:
+        eDict = e.to_dict()
+        embedMsg.add_field(name = eDict['title'], value = eDict['body'], inline =True)
+
+    #weekly boss case
+    if (datetime.now().weekday()) == 6:
+        embedMsg.add_field(name =const.WEEKLY_MSG_BOSS_T, value =const.WEEKLY_MSG_BOSS_D, inline =True)
+
+    #weekly parametric case
+    if isParaDay:
+        embedMsg.add_field(name =const.PARA_MSG_T, value =const.PARA_MSG_D, inline =True)
+
+    embedMsg.set_footer(text = const.DAILY_MSG_FOOT)
+
+    return embedMsg
+
 
 @client.event
 async def on_ready():
     print("Loading QiQi's daily reminder list")
-    
-    # adding users from firebase to users
-    userCol = db.collection(const.USER_COLLECTION).stream()
-    for u in userCol:
-        users.append(u.id)
 
-    msgall.start()
-    
+    msgall.start()    
 
 @client.command()
 async def qiqihelp(ctx):
@@ -60,8 +77,9 @@ async def qiqihelp(ctx):
     )
 
     myEmbed.add_field(name =const.HELP_SIGNUP_T, value =const.HELP_SIGNUP_D, inline =True)
-    myEmbed.add_field(name =const.HELP_QIQIHELP_T, value =const.HELP_QIQIHELP_D, inline =True)
     myEmbed.add_field(name =const.HELP_UNSUB_T, value =const.HELP_UNSUB_D, inline =True)
+    myEmbed.add_field(name =const.HELP_QIQIHELP_T, value =const.HELP_QIQIHELP_D, inline =True)
+    myEmbed.add_field(name =const.HELP_PARA_T, value =const.HELP_PARA_D, inline =True)
 
     await ctx.channel.send(embed=myEmbed)
 
@@ -70,23 +88,26 @@ async def signup(ctx, *ids):
     if len(ids) > 0:
         for i in ids:
             try:
-                un = await client.fetch_user(i)
-                if i not in users:
-                    print("adding: " + i + " username: "+ un.name)
-                    users.append(i)
+                userRef = db.collection(const.USER_COLLECTION).document(i)
+                item = userRef.get()
+                d = item.to_dict()
+
+                if item.exists == False:
+                    print("adding: " + i)
                     await add_db(const.USER_COLLECTION, i)
                 else:
-                    print("skip add: " + i + " username: "+ un.name)
+                    print("skip add: " + i + " username: "+ d['username'])
             except:
                 print("not a valid user id")
     else:
         try:
             myid = format(ctx.message.author.id)
             target = await client.fetch_user(myid)
-            if(myid not in users):
+            userRef = db.collection(const.USER_COLLECTION).document(myid)
+            item = userRef.get()
+            if item.exists == False:
                 await target.send(const.ADD_MSG)
                 await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.ADD_MSG_SUCC)
-                users.append(myid)
                 await add_db(const.USER_COLLECTION, myid)
             else:
                 await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.ADD_MSG_ALREADY_ADDED)
@@ -98,20 +119,21 @@ async def unsub(ctx, *ids):
     if len(ids) > 0:
         for i in ids:
             try:
-                un = await client.fetch_user(i)
-                if i in users:
-                    print("removing: " + i + " username: "+ un.name)
-                    users.remove(i)
+                userRef = db.collection(const.USER_COLLECTION).document(i)
+                item = userRef.get()
+                d = item.to_dict()
+                if item.exists == True:
+                    
+                    print("removing: " + i + " username: "+ d['username'])
                     await remove_db(const.USER_COLLECTION, i)
                 else:
-                    print("skip removal: " + i + " username: "+ un.name)
+                    print("skip removal: " + i + " username: "+ d['username'])
             except:
                 print("not a valid user id")
     else:
         try:
             myid = format(ctx.message.author.id)
             target = await client.fetch_user(myid)
-            users.remove(myid)
             await remove_db(const.USER_COLLECTION, myid)
             await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.UNSUB_MSG)
         except:
@@ -120,7 +142,9 @@ async def unsub(ctx, *ids):
 @client.command()
 async def getusers(ctx, arg=None):
     res = ""
-    for u in users:
+    u_db = db.collection(const.USER_COLLECTION).stream()
+    for item in u_db:
+        u = item.id
         if(arg == "id"):
             res += u+" "
         else:
@@ -138,10 +162,20 @@ async def getusers(ctx, arg=None):
 
 @client.command()
 async def parametric(ctx, day):
+    i = format(ctx.message.author.id)
+    userRef = db.collection(const.USER_COLLECTION).document(i)
+    item = userRef.get()
+    if item.exists == False:
+        await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.PARA_DAY_ID_ERR) 
+        return
+
     if day.lower() in const.DAYS:
         myid = format(ctx.message.author.id)
         await update_db(const.USER_COLLECTION, myid, 'parametricDay', const.DAYS[day.lower()])
-        await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.PARA_DAY_SET_MSG+"**"+day.lower()+"**"+".") 
+        if day.lower() == 'clear':
+            await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.PARA_DAY_CLR_MSG) 
+        else:
+            await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.PARA_DAY_SET_MSG+"**"+day.lower()+"**"+".") 
     else:
         validDays = ''
         for key,_ in const.DAYS.items():
@@ -155,55 +189,39 @@ async def parametric(ctx, day):
 async def msgall():
     print("checking the time")
 
-    embedMsg = discord.Embed(
-        title = const.DAILY_MSG_TITLE,
-        description = const.DAILY_MSG_DESC,
-        colour = discord.Colour.from_rgb(40, 233, 239)
-    )
-    
-    #Ongoing events case
-    eventCol = db.collection(const.EVENT_COLLECTION).stream()
-    for e in eventCol:
-        eDict = e.to_dict()
-        embedMsg.add_field(name = eDict['title'], value = eDict['body'], inline =True)
-
-    #weekly boss case
-    if (datetime.now().weekday()) == 6:
-        embedMsg.add_field(name =const.WEEKLY_MSG_BOSS_T, value =const.WEEKLY_MSG_BOSS_D, inline =True)
-
-    embedMsg.set_footer(text = const.DAILY_MSG_FOOT)
-
+    embedMsg = await embedBuilder(False)
+    embedMsgP = await embedBuilder(True)
+            
     #server is 5 hours ahead pst
     if datetime.now().hour == 17:
         print("correct time")
-        for u in users:
-                print("attempting to msg " + u)
+        u_db = db.collection(const.USER_COLLECTION).stream()
+        for item in u_db:
+                em = embedMsg
+
+                u = item.id
+                d = item.to_dict()
+                
+                # attempt to check user's paraday
+                try:
+                    print(d['parametricDay'])
+                    if datetime.now().weekday()== d['parametricDay']:
+                        em = embedMsgP
+                except:
+                    print("no parametricDay")
+
+                # attempt to send to user
                 try:
                     target = await client.fetch_user(u)
-                    await target.send(embed = embedMsg)
+                    await target.send(embed = em)
                 except:
                     print("QiQi couldn't send to this user: " + u)
 
 # @client.command() 
 # async def testmsg(ctx):
+#     embedmsg = await embedBuilder(False)
+#     embedmsgP = await embedBuilder(True)
 
-#     embedMsg = discord.Embed(
-#     title = const.DAILY_MSG_TITLE,
-#     description = const.DAILY_MSG_DESC,
-#     colour = discord.Colour.from_rgb(40, 233, 239)
-#     )
-    
-#     #Ongoing events case
-#     eventCol = db.collection(const.EVENT_COLLECTION).stream()
-#     for e in eventCol:
-#         eDict = e.to_dict()
-#         embedMsg.add_field(name = eDict['title'], value = eDict['body'], inline =True)
-
-#     #weekly boss case
-#     if (datetime.now().weekday()) == 6:
-#         embedMsg.add_field(name =const.WEEKLY_MSG_BOSS_T, value =const.WEEKLY_MSG_BOSS_D, inline =True)
-
-#     embedMsg.set_footer(text = const.DAILY_MSG_FOOT)
 #     await ctx.channel.send(embed = embedMsg)
 
 client.run(const.TOKEN)
