@@ -1,11 +1,17 @@
 import discord
 import const
+import os
 from discord.ext import commands, tasks
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
+from dotenv import load_dotenv
 
-cred = credentials.Certificate("./firebaseKey.json")
+load_dotenv()
+token = os.getenv('TOKEN')
+firebasekey = os.getenv('KEY')
+
+cred = credentials.Certificate(firebasekey)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 print("firebase loaded up")
@@ -183,7 +189,6 @@ async def parametric(ctx, day):
         validDays = validDays[:-2]
         await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.NO_DAY_ERR+validDays)
 
-#TODO: check for parametricDay and send message accordingly
 #check every 60 minutes 
 @tasks.loop(minutes=60.0)
 async def msgall():
@@ -224,4 +229,4 @@ async def msgall():
 
 #     await ctx.channel.send(embed = embedMsg)
 
-client.run(const.TOKEN)
+client.run(token)

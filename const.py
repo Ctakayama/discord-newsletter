@@ -36,5 +36,3 @@ PARA_MSG_T = "Parametric Transformer is Ready!"
 PARA_MSG_D = "Transmute up to 150 materials in return for rewards"
 DAYS = {'monday':0, 'tuesday':1, 'wednesday':2, 'thursday':3, 'friday':4, 'saturday':5, 'sunday':6, 'clear':-1}
 NO_DAY_ERR = ", QiQi needs a valid day. Valid days include: "
-
-TOKEN = 'ODIxOTI4NDY3ODMzNjgzOTc4.YFK2iQ.5QYYxSdDiemsA3VRNasnP1frN1Y'
