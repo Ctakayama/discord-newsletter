@@ -70,7 +70,7 @@ async def embedBuilder(isParaDay):
 
 @client.event
 async def on_ready():
-    print("Loading QiQi's daily reminder list")
+    print("Readying QiQi's daily reminder list")
 
     msgall.start()    
 
