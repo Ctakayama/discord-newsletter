@@ -1,1 +1,1 @@
-worker: python QiQiBot.py
+worker: python MailBot.py

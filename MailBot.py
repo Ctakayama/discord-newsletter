@@ -42,7 +42,7 @@ async def update_db(myCol, myDoc, key, val):
         print("failed to update "+myDoc +" in " +myCol)
 
 
-async def embedBuilder(isParaDay):
+async def embedBuilder(isReminderDay, reminderMsg):
     embedMsg = discord.Embed(
         title = const.DAILY_MSG_TITLE,
         description = const.DAILY_MSG_DESC,
@@ -55,13 +55,9 @@ async def embedBuilder(isParaDay):
         eDict = e.to_dict()
         embedMsg.add_field(name = eDict['title'], value = eDict['body'], inline =True)
 
-    #weekly boss case
-    if (datetime.now().weekday()) == 6:
-        embedMsg.add_field(name =const.WEEKLY_MSG_BOSS_T, value =const.WEEKLY_MSG_BOSS_D, inline =True)
-
-    #weekly parametric case
-    if isParaDay:
-        embedMsg.add_field(name =const.PARA_MSG_T, value =const.PARA_MSG_D, inline =True)
+    #Weekly reminder case
+    if isReminderDay:
+        embedMsg.add_field(name =const.WEEKLY_MSG_T, value =reminderMsg, inline =True)
 
     embedMsg.set_footer(text = const.DAILY_MSG_FOOT)
 
@@ -70,12 +66,12 @@ async def embedBuilder(isParaDay):
 
 @client.event
 async def on_ready():
-    print("Loading QiQi's daily reminder list")
+    print("Loading daily reminder list")
 
     msgall.start()    
 
 @client.command()
-async def qiqihelp(ctx):
+async def showhelp(ctx):
     myEmbed = discord.Embed(
         title = const.HELP_TITLE,
         description = const.HELP_DESC,
@@ -84,8 +80,8 @@ async def qiqihelp(ctx):
 
     myEmbed.add_field(name =const.HELP_SIGNUP_T, value =const.HELP_SIGNUP_D, inline =True)
     myEmbed.add_field(name =const.HELP_UNSUB_T, value =const.HELP_UNSUB_D, inline =True)
-    myEmbed.add_field(name =const.HELP_QIQIHELP_T, value =const.HELP_QIQIHELP_D, inline =True)
-    myEmbed.add_field(name =const.HELP_PARA_T, value =const.HELP_PARA_D, inline =True)
+    myEmbed.add_field(name =const.HELP_HELP_T, value =const.HELP_HELP_D, inline =True)
+    myEmbed.add_field(name =const.HELP_WEEKLY_T, value =const.HELP_WEEKLY_D, inline =True)
 
     await ctx.channel.send(embed=myEmbed)
 
@@ -167,21 +163,23 @@ async def getusers(ctx, arg=None):
         await target.send("no ids in user")
 
 @client.command()
-async def parametric(ctx, day):
+async def weekly(ctx, day, *mymsg):
     i = format(ctx.message.author.id)
     userRef = db.collection(const.USER_COLLECTION).document(i)
     item = userRef.get()
     if item.exists == False:
-        await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.PARA_DAY_ID_ERR) 
+        await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.WEEKLY_DAY_ID_ERR) 
         return
 
     if day.lower() in const.DAYS:
         myid = format(ctx.message.author.id)
-        await update_db(const.USER_COLLECTION, myid, 'parametricDay', const.DAYS[day.lower()])
+        await update_db(const.USER_COLLECTION, myid, 'reminderDay', const.DAYS[day.lower()])
+        await update_db(const.USER_COLLECTION, myid, 'reminderMsg', " ".join(mymsg[:]))
         if day.lower() == 'clear':
-            await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.PARA_DAY_CLR_MSG) 
+            await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.WEEKLY_DAY_CLR_MSG) 
         else:
-            await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.PARA_DAY_SET_MSG+"**"+day.lower()+"**"+".") 
+            await ctx.channel.send("'{}'".format(ctx.message.author.mention)+const.WEEKLY_DAY_SET_MSG_A+"**"+
+                " ".join(mymsg[:])+"**"+" "+const.WEEKLY_DAY_SET_MSG_B + "**"+day.lower()+"**"+".") 
     else:
         validDays = ''
         for key,_ in const.DAYS.items():
@@ -194,11 +192,10 @@ async def parametric(ctx, day):
 async def msgall():
     print("checking the time: " + str(datetime.now().hour) + "; today is: " + str(datetime.now().weekday()))
 
-    embedMsg = await embedBuilder(False)
-    embedMsgP = await embedBuilder(True)
-            
+    embedMsg = await embedBuilder(False, "")
+    
     #server is 5 hours ahead pst
-    if datetime.now().hour == 17:
+    if True:
         print("correct time")
         u_db = db.collection(const.USER_COLLECTION).stream()
         for item in u_db:
@@ -207,19 +204,19 @@ async def msgall():
                 u = item.id
                 d = item.to_dict()
                 
-                # attempt to check user's paraday
+                # attempt to check user's weekly reminder
                 try:
-                    print(d['parametricDay'])
-                    if datetime.now().weekday()== d['parametricDay']:
-                        em = embedMsgP
+                    print(d['reminderDay'])
+                    if datetime.now().weekday()== d['reminderDay']:
+                        em = await embedBuilder(True, d['reminderMsg'])
                 except:
-                    print("no parametricDay")
+                    print("no weekly Reminder")
 
                 # attempt to send to user
                 try:
                     target = await client.fetch_user(u)
                     await target.send(embed = em)
                 except:
-                    print("QiQi couldn't send to this user: " + u)
+                    print("couldn't send to this user: " + u)
 
 client.run(token)
