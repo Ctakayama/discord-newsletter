@@ -195,7 +195,7 @@ async def msgall():
     embedMsg = await embedBuilder(False, "")
     
     #server is 5 hours ahead pst
-    if True:
+    if datetime.now().hour == 17:
         print("correct time")
         u_db = db.collection(const.USER_COLLECTION).stream()
         for item in u_db:
