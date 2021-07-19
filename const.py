@@ -2,7 +2,7 @@ HELP_TITLE = "Daily Newsletter Bot"
 HELP_DESC = "A reminder bot to make sure you remember to do your daily tasks. \
             The list takes the following commands: "
 HELP_SIGNUP_T = "-signup"
-HELP_SIGNUP_D = "Add you to the mailing list"
+HELP_SIGNUP_D = "Adds you to the mailing list"
 HELP_HELP_T= "-showhelp"
 HELP_HELP_D= "Shows all the commands for this bot"
 HELP_UNSUB_T = "-unsub"
