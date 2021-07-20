@@ -34,6 +34,8 @@ Use the .env-sample file as a guide for how to create this .env file.
 In the Cloud Firestore database, create 2 collections, one titled *events*, the other titled *users*. <br /> This is where the bot
 will store the newsletter information and the subscriber list, respectively.
 
+For each event you want to add, create a document with a *body* and *title* field, this will be used in the daily newsletter.
+
 [Create a Firebase json key (Initialize the SDK section)](https://firebase.google.com/docs/admin/setup#initialize-sdk), and add its path to the .env file under the KEY variable.
 
 Once you have setup the discord bot and the database, you can run the bot locally
