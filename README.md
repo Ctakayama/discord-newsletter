@@ -47,4 +47,4 @@ Create a new app on [heroku.com](https://id.heroku.com/login)
 
 Under the Deploy tab, install the Heroku CLI & push the repo's content to Heroku's servers
 
-Under the resources tab, activate a workor for MailBot.py & the discord bot will begin to run.
+Under the resources tab, activate a worker for MailBot.py & the discord bot will begin to run.
