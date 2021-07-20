@@ -3,6 +3,8 @@
 **Discord-Newsletter** is a discord mailing bot that sends a daily newsletter to subscribed users
 based on content from a cloud-hosted database
 
+![Screenshot](https://user-images.githubusercontent.com/33171566/126244520-c1acb412-db79-41b6-9c61-ab431bc62ee6.PNG)
+
 ## Features
 **Discord-Newsletter** allows a discord admin to automatically send daily reminders to other users
 about events, updates, notices, etc.
