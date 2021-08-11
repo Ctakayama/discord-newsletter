@@ -5,6 +5,13 @@ based on content from a cloud-hosted database
 
 ![Screenshot](https://user-images.githubusercontent.com/33171566/126244520-c1acb412-db79-41b6-9c61-ab431bc62ee6.PNG)
 
+## Command List
+
+* **-signup** = Adds you to the mailing list
+* **-unsub** = Removes you from the mailing list
+* **-showhelp** = Shows all the commands for this bot
+* **-weekly *day* *message*** = Reminds you on a set *day* with a custom *message*, use -weekly clear to disable the reminder e.g. -weekly monday feed goldfish
+
 ## Features
 **Discord-Newsletter** allows a discord admin to automatically send daily reminders to other users
 about events, updates, notices, etc.
@@ -33,6 +40,8 @@ Use the .env-sample file as a guide for how to create this .env file.
 
 In the Cloud Firestore database, create 2 collections, one titled *events*, the other titled *users*. <br /> This is where the bot
 will store the newsletter information and the subscriber list, respectively.
+
+![Screenshot](https://user-images.githubusercontent.com/33171566/126245375-f05a451d-1446-4b01-8d5a-9608a2adebaa.PNG)
 
 For each event you want to add, create a document with a *body* and *title* field, this will be used in the daily newsletter.
 
